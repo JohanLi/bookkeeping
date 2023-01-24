@@ -1,0 +1,21 @@
+# Bookkeeping
+
+A Chrome extension to help me manage the books of my software company.
+
+## How to run it
+
+```
+npm install
+npm run dev
+```
+
+Visit `chrome://extensions/`, turn on developer mode, and click "Load unpacked".
+Select the `dist` folder.
+
+## Links
+
+- https://developer.chrome.com/docs/extensions/mv3/getstarted/
+- https://crxjs.dev/vite-plugin
+- https://developer.chrome.com/docs/extensions/mv3/content_scripts/#frames
+
+The project was set up using [this guide](https://crxjs.dev/vite-plugin/getting-started/vanilla-js/create-project).
