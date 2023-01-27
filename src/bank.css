@@ -1,0 +1,10 @@
+.bookkeepingPopup {
+    border: 1px solid #eee;
+    background: #fff;
+    font-size: 24px;
+    padding: 40px;
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 9999;
+}

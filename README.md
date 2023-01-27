@@ -17,5 +17,6 @@ Select the `dist` folder.
 - https://developer.chrome.com/docs/extensions/mv3/getstarted/
 - https://crxjs.dev/vite-plugin
 - https://developer.chrome.com/docs/extensions/mv3/content_scripts/#frames
+- https://developer.chrome.com/docs/extensions/reference/downloads/
 
 The project was set up using [this guide](https://crxjs.dev/vite-plugin/getting-started/vanilla-js/create-project).
