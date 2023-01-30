@@ -17,6 +17,7 @@
     "type": "module"
   },
   "permissions": [
-    "downloads"
+    "downloads",
+    "downloads.shelf"
   ]
 }

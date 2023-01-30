@@ -11,7 +11,7 @@
   Invoices are found in Kundservice > Dokument & avtal
  */
 
-import { waitUntil } from './common'
+import { insertClearDownloadsButton, waitUntil } from './common'
 import './bank.css'
 
 export type InvoicePdfLink = {
@@ -32,8 +32,8 @@ async function main() {
 
   const div = document.createElement('div')
   div.className = 'bookkeepingPopup'
-  div.textContent = 'Attempting to find invoices...'
-  document.body.appendChild(div)
+  div.textContent = 'Attempting to find invoices...\n'
+  document.body.prepend(div)
 
   await waitUntil(() => {
     return !!Array.from(document.querySelectorAll('a')).find((link) => link.textContent?.trim() === 'Faktura (pdf)')
@@ -51,7 +51,7 @@ async function main() {
   })
 
   if (invoicePdfLinks[invoicePdfLinks.length - 1].date !== FIRST_INVOICE_DATE) {
-    div.textContent = 'The last invoice detected is not the first invoice. This script needs to be revised.'
+    div.textContent += 'The last invoice detected is not the first invoice. This script needs to be revised.\n'
     return
   }
 
@@ -59,14 +59,18 @@ async function main() {
   button.type = 'button'
   button.textContent = `Download ${invoicePdfLinks.length} invoices`
 
-  div.textContent = ''
   div.appendChild(button)
 
   button.addEventListener('click', async () => {
+    button.remove()
+    div.textContent += 'Downloading...\n'
+
     const response = await chrome.runtime.sendMessage({ invoicePdfLinks })
     console.log(response);
 
-    button.textContent = 'Downloaded'
+    div.textContent += 'Downloaded\n'
+
+    insertClearDownloadsButton(div)
   })
 }
 

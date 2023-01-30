@@ -5,6 +5,9 @@ chrome.runtime.onMessage.addListener(
     (async () => {
       const { invoicePdfLinks, clear } = request
 
+      // explicitly requires the "downloads.shelf" permission
+      chrome.downloads.setShelfEnabled(false);
+
       if (invoicePdfLinks) {
         await Promise.all(invoicePdfLinks.map((invoicePdfLink: InvoicePdfLink) => chrome.downloads.download({
           url: invoicePdfLink.link,
@@ -13,6 +16,12 @@ chrome.runtime.onMessage.addListener(
         })))
       }
 
+      /*
+        While erase() should merely remove files from the download history, an
+        undocumented behavior is that files actually get deleted if erase()
+        is called as part of the same user action. This is probably done
+        for security reasons.
+       */
       if (clear) {
         await chrome.downloads.erase({})
       }

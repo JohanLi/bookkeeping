@@ -14,3 +14,18 @@ export function waitUntil(fn: () => boolean, maxWaitSeconds = 5) {
     }, 200);
   });
 }
+
+export function insertClearDownloadsButton(parent: HTMLElement) {
+  const button = document.createElement('button')
+  button.type = 'button'
+  button.textContent = `Clear history`
+
+  button.addEventListener('click', async () => {
+    const response = chrome.runtime.sendMessage({ clear: true })
+    console.log(response)
+
+    button.remove()
+  })
+
+  parent.appendChild(button)
+}
