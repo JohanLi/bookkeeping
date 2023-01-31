@@ -7,9 +7,8 @@
     {
       "js": ["src/bank.ts"],
       "matches": [
-        "https://*.seb.se/*"
-      ],
-      "all_frames": true
+        "https://apps.seb.se/*"
+      ]
     }
   ],
   "background": {

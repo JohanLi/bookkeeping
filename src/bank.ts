@@ -11,8 +11,17 @@
   Invoices are found in Kundservice > Dokument & avtal
  */
 
-import { insertClearDownloadsButton, waitUntil } from './common'
+import { insertClearDownloadsButton } from './common'
 import './bank.css'
+
+// This API is called from the Kundservice > Dokument & avtal page
+const API_BASE_URL = 'https://ibf.apps.seb.se/dsc/digitaldocuments-corporate/digitaldocuments'
+
+type Document = {
+  document_key: string;
+  title: string;
+  effective_date: string;
+}
 
 export type InvoicePdfLink = {
   date: string
@@ -23,35 +32,28 @@ export type InvoicePdfLink = {
 const FIRST_INVOICE_DATE = '2021-12-07'
 
 async function main() {
-  const isInvoicePage = document.querySelector('h1')?.textContent?.trim() === 'Dokument och avtal'
+  const div = document.createElement('div')
+  div.className = 'bookkeepingPopup'
+  div.textContent = 'Attempting to fetch invoices...\n'
+  document.body.prepend(div)
 
-  if (!isInvoicePage) {
-    console.log('Did not detect invoice page, exiting')
+  const response = await fetch(API_BASE_URL, { credentials: 'include' })
+
+  if (!response.ok) {
+    div.textContent += 'Error. Check the console\n'
+    console.log(response)
     return
   }
 
-  const div = document.createElement('div')
-  div.className = 'bookkeepingPopup'
-  div.textContent = 'Attempting to find invoices...\n'
-  document.body.prepend(div)
+  const documents = await response.json() as Document[]
 
-  await waitUntil(() => {
-    return !!Array.from(document.querySelectorAll('a')).find((link) => link.textContent?.trim() === 'Faktura (pdf)')
-  })
-
-  const links = Array.from(document.querySelectorAll('a'))
-
-  const invoicePdfLinks: InvoicePdfLink[] = links.filter((link) => link.textContent?.trim() === 'Faktura (pdf)').map((link) => {
-    const date = link.closest('tr')?.querySelector('td[data-th="Datum"]')?.textContent?.trim() || ''
-
-    return {
-      date,
-      link: link.href,
-    }
-  })
+  const invoicePdfLinks = documents.filter(({ title }) => title === 'Faktura').map((document) => ({
+    link: `${API_BASE_URL}/pdf/${document.document_key}`,
+    date: document.effective_date,
+  }))
 
   if (invoicePdfLinks[invoicePdfLinks.length - 1].date !== FIRST_INVOICE_DATE) {
-    div.textContent += 'The last invoice detected is not the first invoice. This script needs to be revised.\n'
+    div.textContent += 'The earliest invoice found does not match the known earliest invoice. This script might need to be updated.\n'
     return
   }
 
@@ -66,11 +68,14 @@ async function main() {
     div.textContent += 'Downloading...\n'
 
     const response = await chrome.runtime.sendMessage({ invoicePdfLinks })
-    console.log(response);
 
-    div.textContent += 'Downloaded\n'
+    if (response.success) {
+      div.textContent += 'Downloaded\n'
 
-    insertClearDownloadsButton(div)
+      insertClearDownloadsButton(div)
+    } else {
+      div.textContent += 'Failed: one or more files could not be downloaded\n'
+    }
   })
 }
 

@@ -1,19 +1,23 @@
 import { InvoicePdfLink } from './bank'
+import { download } from './download';
 
 chrome.runtime.onMessage.addListener(
   function (request, _sender, sendResponse) {
     (async () => {
       const { invoicePdfLinks, clear } = request
 
-      // explicitly requires the "downloads.shelf" permission
-      chrome.downloads.setShelfEnabled(false);
-
       if (invoicePdfLinks) {
-        await Promise.all(invoicePdfLinks.map((invoicePdfLink: InvoicePdfLink) => chrome.downloads.download({
-          url: invoicePdfLink.link,
-          filename: `bookkeeping/seb/seb-${invoicePdfLink.date}.pdf`,
-          conflictAction: 'overwrite',
-        })))
+        try {
+          await download(invoicePdfLinks.map((invoicePdfLink: InvoicePdfLink) => ({
+            url: invoicePdfLink.link,
+            filename: `bookkeeping/seb/seb-${invoicePdfLink.date}.pdf`,
+          })))
+
+          sendResponse({ success: true })
+        } catch(e) {
+          sendResponse({ success: false })
+          console.log(e)
+        }
       }
 
       /*
@@ -24,9 +28,8 @@ chrome.runtime.onMessage.addListener(
        */
       if (clear) {
         await chrome.downloads.erase({})
+        sendResponse({ success: true })
       }
-
-      sendResponse({ success: true })
     })();
 
     return true

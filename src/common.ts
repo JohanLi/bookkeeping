@@ -21,9 +21,7 @@ export function insertClearDownloadsButton(parent: HTMLElement) {
   button.textContent = `Clear history`
 
   button.addEventListener('click', async () => {
-    const response = chrome.runtime.sendMessage({ clear: true })
-    console.log(response)
-
+    await chrome.runtime.sendMessage({ clear: true })
     button.remove()
   })
 
