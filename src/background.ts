@@ -1,17 +1,21 @@
-import { InvoicePdfLink } from './bank'
 import { download } from './download';
+
+export type Download = {
+  url: string;
+  filename: string;
+}
 
 chrome.runtime.onMessage.addListener(
   function (request, _sender, sendResponse) {
     (async () => {
-      const { invoicePdfLinks, clear } = request
+      const { downloads, clear } = request as {
+        downloads?: Download[];
+        clear?: true;
+      }
 
-      if (invoicePdfLinks) {
+      if (downloads) {
         try {
-          await download(invoicePdfLinks.map((invoicePdfLink: InvoicePdfLink) => ({
-            url: invoicePdfLink.link,
-            filename: `bookkeeping/seb/seb-${invoicePdfLink.date}.pdf`,
-          })))
+          await download(downloads)
 
           sendResponse({ success: true })
         } catch(e) {

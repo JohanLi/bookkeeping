@@ -9,6 +9,12 @@
       "matches": [
         "https://apps.seb.se/*"
       ]
+    },
+    {
+      "js": ["src/tre.ts"],
+      "matches": [
+        "https://www.tre.se/mitt3/fakturor"
+      ]
     }
   ],
   "background": {

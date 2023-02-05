@@ -12,20 +12,19 @@
  */
 
 import { insertClearDownloadsButton } from './common'
-import './bank.css'
+import './global.css'
+import { Download } from './background';
 
-// This API is called from the Kundservice > Dokument & avtal page
+/*
+  This API is called from the Kundservice > Dokument & avtal page.
+  You need to first visit that page before it works — logging in alone won't do it
+ */
 const API_BASE_URL = 'https://ibf.apps.seb.se/dsc/digitaldocuments-corporate/digitaldocuments'
 
 type Document = {
   document_key: string;
   title: string;
   effective_date: string;
-}
-
-export type InvoicePdfLink = {
-  date: string
-  link: string
 }
 
 // used as a check in case the results get paginated
@@ -47,19 +46,19 @@ async function main() {
 
   const documents = await response.json() as Document[]
 
-  const invoicePdfLinks = documents.filter(({ title }) => title === 'Faktura').map((document) => ({
-    link: `${API_BASE_URL}/pdf/${document.document_key}`,
-    date: document.effective_date,
-  }))
-
-  if (invoicePdfLinks[invoicePdfLinks.length - 1].date !== FIRST_INVOICE_DATE) {
+  if (documents[documents.length - 1].effective_date !== FIRST_INVOICE_DATE) {
     div.textContent += 'The earliest invoice found does not match the known earliest invoice. This script might need to be updated.\n'
     return
   }
 
+  const downloads: Download[] = documents.filter(({ title }) => title === 'Faktura').map((document) => ({
+    url: `${API_BASE_URL}/pdf/${document.document_key}`,
+    filename: `bookkeeping/seb/seb-${document.effective_date}.pdf`,
+  }))
+
   const button = document.createElement('button')
   button.type = 'button'
-  button.textContent = `Download ${invoicePdfLinks.length} invoices`
+  button.textContent = `Download ${downloads.length} invoices`
 
   div.appendChild(button)
 
@@ -67,7 +66,7 @@ async function main() {
     button.remove()
     div.textContent += 'Downloading...\n'
 
-    const response = await chrome.runtime.sendMessage({ invoicePdfLinks })
+    const response = await chrome.runtime.sendMessage({ downloads })
 
     if (response.success) {
       div.textContent += 'Downloaded\n'
